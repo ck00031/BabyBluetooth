@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B69008DD1FE047C00032C192 /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B69008DC1FE047AE0032C192 /* CoreBluetooth.framework */; };
 		F03BCB8F1BBB8F1500D62A8E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F03BCB8E1BBB8F1500D62A8E /* AppDelegate.swift */; };
 		F03BCB911BBB8F1500D62A8E /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F03BCB901BBB8F1500D62A8E /* ViewController.swift */; };
 		F03BCB931BBB8F1500D62A8E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F03BCB921BBB8F1500D62A8E /* Assets.xcassets */; };
@@ -14,6 +15,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		B69008DC1FE047AE0032C192 /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
 		F03BCB8B1BBB8F1500D62A8E /* BluetoothStubOnOSX.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BluetoothStubOnOSX.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F03BCB8E1BBB8F1500D62A8E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F03BCB901BBB8F1500D62A8E /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -27,17 +29,27 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B69008DD1FE047C00032C192 /* CoreBluetooth.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B69008DB1FE047AE0032C192 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B69008DC1FE047AE0032C192 /* CoreBluetooth.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		F03BCB821BBB8F1500D62A8E = {
 			isa = PBXGroup;
 			children = (
 				F03BCB8D1BBB8F1500D62A8E /* BluetoothStubOnOSX */,
 				F03BCB8C1BBB8F1500D62A8E /* Products */,
+				B69008DB1FE047AE0032C192 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -92,6 +104,7 @@
 				TargetAttributes = {
 					F03BCB8A1BBB8F1500D62A8E = {
 						CreatedOnToolsVersion = 7.0;
+						LastSwiftMigration = 0910;
 					};
 				};
 			};
@@ -238,6 +251,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.id4test.liu.BluetoothStubOnOSX;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
@@ -250,6 +264,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.id4test.liu.BluetoothStubOnOSX;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
 		};
@@ -272,6 +287,7 @@
 				F03BCB9C1BBB8F1500D62A8E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

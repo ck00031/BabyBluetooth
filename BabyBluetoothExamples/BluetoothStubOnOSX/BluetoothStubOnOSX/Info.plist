@@ -28,6 +28,8 @@
 	<string>Copyright © 2015年 liuyanwei. All rights reserved.</string>
 	<key>NSMainStoryboardFile</key>
 	<string>Main</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>蓝牙设备请求描述，比如：程序需要使用蓝牙进行设备发现</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 </dict>

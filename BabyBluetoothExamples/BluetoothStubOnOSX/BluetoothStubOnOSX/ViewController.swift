@@ -9,20 +9,18 @@
 import Cocoa
 import CoreBluetooth
 
-
-
 class ViewController: NSViewController,CBPeripheralManagerDelegate{
 
 //MARK:- static parameter
 
     let localNameKey =  "BabyBluetoothStubOnOSX";
-    let ServiceUUID =  "FFF0";
-    let notiyCharacteristicUUID =  "FFF1";
-    let readCharacteristicUUID =  "FFF2";
-    let readwriteCharacteristicUUID =  "FFE3";
+    let ServiceUUID =  "6F26CE21-DA83-449D-B9A6-E3E43F5DC639";
+    let notiyCharacteristicUUID =  "977F0ED0-E9F5-4249-B0DB-A02EA5BD0CC1";
+    let readCharacteristicUUID =  "2055CFFC-6899-492D-B673-5B486B9E8786";
+    let readwriteCharacteristicUUID =  "19651AB4-23B1-4215-B807-5B636D0F42FD";
     
     var peripheralManager:CBPeripheralManager!
-    var timer:NSTimer!
+	var timer:Timer!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,110 +31,115 @@ class ViewController: NSViewController,CBPeripheralManagerDelegate{
     //publish service and characteristic
     func publishService(){
         
-        let notiyCharacteristic = CBMutableCharacteristic(type: CBUUID(string: notiyCharacteristicUUID), properties:  [CBCharacteristicProperties.Notify], value: nil, permissions: CBAttributePermissions.Readable)
-        let readCharacteristic = CBMutableCharacteristic(type: CBUUID(string: readCharacteristicUUID), properties:  [CBCharacteristicProperties.Read], value: nil, permissions: CBAttributePermissions.Readable)
-        let writeCharacteristic = CBMutableCharacteristic(type: CBUUID(string: readwriteCharacteristicUUID), properties:  [CBCharacteristicProperties.Write,CBCharacteristicProperties.Read], value: nil, permissions: [CBAttributePermissions.Readable,CBAttributePermissions.Writeable])
+		let notiyCharacteristic = CBMutableCharacteristic(type: CBUUID(string: notiyCharacteristicUUID), properties:  [CBCharacteristicProperties.notify], value: nil, permissions: CBAttributePermissions.readable)
+		let readCharacteristic = CBMutableCharacteristic(type: CBUUID(string: readCharacteristicUUID), properties:  [CBCharacteristicProperties.read], value: nil, permissions: CBAttributePermissions.readable)
+		let writeCharacteristic = CBMutableCharacteristic(type: CBUUID(string: readwriteCharacteristicUUID), properties:  [CBCharacteristicProperties.write,CBCharacteristicProperties.read], value: nil, permissions: [CBAttributePermissions.readable,CBAttributePermissions.writeable])
         
         //设置description
         let descriptionStringType = CBUUID(string: CBUUIDCharacteristicUserDescriptionString)
         let description1 = CBMutableDescriptor(type: descriptionStringType, value: "canNotifyCharacteristic")
         let description2 = CBMutableDescriptor(type: descriptionStringType, value: "canReadCharacteristic")
         let description3 = CBMutableDescriptor(type: descriptionStringType, value: "canWriteAndWirteCharacteristic")
-        notiyCharacteristic.descriptors = [description1];
-        readCharacteristic.descriptors = [description2];
-        writeCharacteristic.descriptors = [description3];
+        notiyCharacteristic.descriptors = [description1]
+        readCharacteristic.descriptors = [description2]
+        writeCharacteristic.descriptors = [description3]
         
         //设置service
         let service:CBMutableService =  CBMutableService(type: CBUUID(string: ServiceUUID), primary: true)
         service.characteristics = [notiyCharacteristic,readCharacteristic,writeCharacteristic]
-        peripheralManager.addService(service);
-        
+		peripheralManager.add(service)
     }
     //发送数据，发送当前时间的秒数
-    func sendData(t:NSTimer)->Bool{
+	func sendData(t:Timer)->Bool{
         let characteristic = t.userInfo as!  CBMutableCharacteristic;
-        let dft = NSDateFormatter();
+		let dft = DateFormatter();
         dft.dateFormat = "ss";
-        NSLog("%@",dft.stringFromDate(NSDate()))
+		NSLog("%@",dft.string(from: NSDate() as Date))
         
         //执行回应Central通知数据
-        return peripheralManager.updateValue(dft.stringFromDate(NSDate()).dataUsingEncoding(NSUTF8StringEncoding)!, forCharacteristic: characteristic, onSubscribedCentrals: nil)
+		return peripheralManager.updateValue(dft.string(from: NSDate() as Date).data(using: String.Encoding.utf8)!, for: characteristic, onSubscribedCentrals: nil)
     }
 
     //MARK:- CBPeripheralManagerDelegate
-    func peripheralManagerDidUpdateState(peripheral: CBPeripheralManager) {
-        switch peripheral.state{
-        case CBPeripheralManagerState.PoweredOn:
-            NSLog("power on")
-            publishService();
-        case CBPeripheralManagerState.PoweredOff:
-            NSLog("power off")
-        default:break;
-        }
-    }
-    
-    
-    
-    func peripheralManager(peripheral: CBPeripheralManager, didAddService service: CBService, error: NSError?) {
-        peripheralManager.startAdvertising(
-            [
-                CBAdvertisementDataServiceUUIDsKey : [CBUUID(string: ServiceUUID)]
-                ,CBAdvertisementDataLocalNameKey : localNameKey
-            ]
-        )
-    }
-    
-    func peripheralManagerDidStartAdvertising(peripheral: CBPeripheralManager, error: NSError?) {
-        NSLog("in peripheralManagerDidStartAdvertisiong");
+	func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
+		switch peripheral.state{
+		case .poweredOn:
+			NSLog("power on")
+			publishService();
+		case .poweredOff:
+			NSLog("power off")
+		default:
+			print(">>>设备不支持BLE或者是未打开蓝牙")
+			break;
+		}
+	}
+	
+	func peripheralManager(_ peripheral: CBPeripheralManager, didAdd service: CBService, error: Error?) {
+		peripheralManager.startAdvertising(
+			[
+				CBAdvertisementDataServiceUUIDsKey : [CBUUID(string: ServiceUUID)]
+				,CBAdvertisementDataLocalNameKey : localNameKey
+			]
+		)
+	}
+	
+	func peripheralManagerIsReady(toUpdateSubscribers peripheral: CBPeripheralManager) {
+		print("peripheralManagerIsReady")
+	}
+	
+	func peripheralManagerDidStartAdvertising(_ peripheral: CBPeripheralManager, error: Error?) {
+        print("in peripheralManagerDidStartAdvertisiong");
     }
     
     //订阅characteristics
-    func peripheralManager(peripheral: CBPeripheralManager, central: CBCentral, didSubscribeToCharacteristic characteristic: CBCharacteristic) {
-        NSLog("订阅了 %@的数据",characteristic.UUID)
-        //每秒执行一次给主设备发送一个当前时间的秒数
-        timer = NSTimer.scheduledTimerWithTimeInterval(1, target: self, selector:"sendData:" , userInfo: characteristic, repeats: true)
-    }
-    
-    
+	func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didSubscribeTo characteristic: CBCharacteristic) {
+		print("订阅了 \(characteristic.uuid)的数据")
+		//每秒执行一次给主设备发送一个当前时间的秒数
+		timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector:Selector(("sendData:")) , userInfo: characteristic, repeats: true)
+	}
+	
     //取消订阅characteristics
-    func peripheralManager(peripheral: CBPeripheralManager, central: CBCentral, didUnsubscribeFromCharacteristic characteristic: CBCharacteristic) {
-        NSLog("取消订阅 %@的数据",characteristic.UUID)
+	
+	func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didUnsubscribeFrom characteristic: CBCharacteristic) {
+		NSLog("取消订阅 \(characteristic.uuid)的数据")
         //取消回应
         timer.invalidate()
     }
    
     
     //读characteristics请求
-    func peripheralManager(peripheral: CBPeripheralManager, didReceiveReadRequest request: CBATTRequest) {
-        NSLog("didReceiveReadRequest")
-        //判断是否有读数据的权限
-        if(request.characteristic.properties.contains(CBCharacteristicProperties.Read))
-        {
-            request.value = request.characteristic.value;
-            peripheral .respondToRequest(request, withResult: CBATTError.Success);
-        }
-        else{
-            peripheral .respondToRequest(request, withResult: CBATTError.ReadNotPermitted);
-        }
-    }
-    
-    func peripheralManager(peripheral: CBPeripheralManager, didReceiveWriteRequests requests: [CBATTRequest]) {
-        NSLog("didReceiveWriteRequests")
-        let request:CBATTRequest = requests[0];
-        
-        //判断是否有写数据的权限
-        if (request.characteristic.properties.contains(CBCharacteristicProperties.Write)) {
-            //需要转换成CBMutableCharacteristic对象才能进行写值
-            let c:CBMutableCharacteristic = request.characteristic as! CBMutableCharacteristic
-            c.value = request.value;
-            peripheral .respondToRequest(request, withResult: CBATTError.Success);
-        }else{
-             peripheral .respondToRequest(request, withResult: CBATTError.ReadNotPermitted);
-        }
-    }
-    
+	func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
+		print("didReceiveReadRequest")
+		//判断是否有读数据的权限
+		if(request.characteristic.properties.contains(CBCharacteristicProperties.read))
+		{
+			request.value = request.characteristic.value;
+			peripheral .respond(to: request, withResult: .success);
+		}
+		else{
+			peripheral .respond(to: request, withResult: .readNotPermitted);
+		}
+	}
+	
+	func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {
+		print("didReceiveWriteRequests")
+		let request:CBATTRequest = requests[0];
+		
+		//判断是否有写数据的权限
+		if (request.characteristic.properties.contains(CBCharacteristicProperties.write)) {
+			//需要转换成CBMutableCharacteristic对象才能进行写值
+			let c:CBMutableCharacteristic = request.characteristic as! CBMutableCharacteristic
+			c.value = request.value;
+			let tempValue:NSString = NSString.init(data: request.value!, encoding: String.Encoding.utf8.rawValue)!
+			print("tempValue:\(tempValue)")
+			peripheral .respond(to: request, withResult: .success);
+		}else{
+			peripheral .respond(to: request, withResult: .readNotPermitted);
+		}
+	}
+
     func peripheralManagerIsReadyToUpdateSubscribers(peripheral: CBPeripheralManager) {
-            NSLog("peripheralManagerIsReadyToUpdateSubscribers")
+            print("peripheralManagerIsReadyToUpdateSubscribers")
     }
 }
 
